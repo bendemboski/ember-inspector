@@ -47,7 +47,7 @@ export default BasicAdapter.extend({
   inspectElement(elem) {
     /* inspect(elem); */
     this.get('namespace.port').send('view:inspectDOMElement', {
-      elementSelector: `#${elem.getAttribute('id')}`
+      elementSelector: `[data-inspector-selector="${elem.getAttribute('data-inspector-selector')}"]`
     });
   },
 

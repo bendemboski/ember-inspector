@@ -80,10 +80,10 @@ export default BasicAdapter.extend({
    * Open the devtools "Elements" tab and select a specific DOM element.
    *
    * @method inspectDOMElement
-   * @param  {String} selector jQuery selector
+   * @param  {String} selector The 'data-inspector-selector' string
    */
   inspectDOMElement(selector) {
-    chrome.devtools.inspectedWindow.eval(`inspect($('${selector}')[0])`);
+    chrome.devtools.inspectedWindow.eval(`inspect(document.querySelector('${selector}'))`);
   },
 
   /**
