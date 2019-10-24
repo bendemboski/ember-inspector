@@ -15,7 +15,7 @@ let metal;
 try {
   glimmer = Ember.__loader.require('@glimmer/reference');
   metal = Ember.__loader.require('@ember/-internals/metal');
-} catch (e) {
+} catch(e) {
   glimmer = null;
   metal = null;
 }
@@ -136,7 +136,7 @@ function isMandatorySetter(descriptor) {
   return false;
 }
 
-function getTagTrackedProps(tag, ownTag, level=0) {
+function getTagTrackedProps(tag, ownTag, level = 0) {
   const props = [];
   // do not include tracked properties from dependencies
   if (!tag || level > 1) {
@@ -183,7 +183,7 @@ export default EmberObject.extend(PortMixin, {
 
   updateCurrentObject() {
     if (this.currentObject) {
-      const {object, mixinDetails, objectId} = this.currentObject;
+      const { object, mixinDetails, objectId } = this.currentObject;
       mixinDetails.forEach((mixin, mixinIndex) => {
         mixin.properties.forEach(item => {
           if (item.overridden) {
@@ -197,7 +197,7 @@ export default EmberObject.extend(PortMixin, {
             let value = null;
             let changed = false;
             const values = this.objectPropertyValues[objectId] = this.objectPropertyValues[objectId] || {};
-            const tracked = this.trackedTags[objectId] = this.trackedTags[objectId]  || {};
+            const tracked = this.trackedTags[objectId] = this.trackedTags[objectId] || {};
 
             const desc = Object.getOwnPropertyDescriptor(object, item.name);
             const isSetter = desc && isMandatorySetter(desc);
@@ -231,7 +231,7 @@ export default EmberObject.extend(PortMixin, {
               }
               this.sendMessage('updateProperty', { objectId, property: item.name, value, mixinIndex, dependentKeys });
             }
-          } catch (e) {
+          } catch(e) {
             // dont do anything
           }
         });
@@ -335,7 +335,7 @@ export default EmberObject.extend(PortMixin, {
     inspectById(message) {
       const obj = this.sentObjects[message.objectId];
       if (obj) {
-        this.sendObject(obj.instance || obj);
+        this.sendObject(obj);
       }
     },
     inspectByContainerLookup(message) {
@@ -413,7 +413,13 @@ export default EmberObject.extend(PortMixin, {
     if (!this.canSend(object)) {
       throw new Error(`Can't inspect ${object}. Only Ember objects and arrays are supported.`);
     }
-    let details = this.mixinsForObject(object);
+    // Support template only components, which do not have an instance
+    let details = { objectId: null, mixins: [], errors: [] };
+
+    if (object.instance) {
+      details = this.mixinsForObject(object.instance);
+    }
+
     this.sendMessage('updateObject', {
       objectId: details.objectId,
       name: object.toString(),
@@ -600,7 +606,7 @@ export default EmberObject.extend(PortMixin, {
     let objectId = this.retainObject(object);
 
     let errorsForObject = this.get('_errorsFor')[objectId] = {};
-    const tracked = this.trackedTags[objectId] = this.trackedTags[objectId]  || {};
+    const tracked = this.trackedTags[objectId] = this.trackedTags[objectId] || {};
     calculateCPs(object, mixinDetails, errorsForObject, expensiveProperties, tracked);
 
     this.currentObject = { object, mixinDetails, objectId };
@@ -684,7 +690,7 @@ function ownMixins(object) {
 function ownProperties(object) {
   let meta = Ember.meta(object);
   let parentMeta = meta.parent;
-  
+
   if (Array.isArray(object)) {
     // slice to max 101, for performance and so that the object inspector will show a `more items` indicator above 100
     object = object.slice(0, 101);
@@ -914,7 +920,7 @@ function calculateCPs(object, mixinDetails, errorsForObject, expensiveProperties
             tagInfo.revision = glimmer.value(object, item.name);
             item.dependentKeys = getTrackedDependencies(object, item.name, tagInfo.tag);
           } else {
-           value = calculateCP(object, item.name, errorsForObject);
+            value = calculateCP(object, item.name, errorsForObject);
           }
           if (!value || !(value instanceof CalculateCPError)) {
             item.value = inspectValue(object, item.name, value);

@@ -50,14 +50,14 @@ export default class {
    *  - {Object}     viewRegistry    Hash containing all currently rendered components by id.
    */
   constructor({
-    owner,
-    retainObject,
-    options,
-    durations,
-    highlightRange,
-    objectInspector,
-    viewRegistry
-  }) {
+                owner,
+                retainObject,
+                options,
+                durations,
+                highlightRange,
+                objectInspector,
+                viewRegistry
+              }) {
     this.owner = owner;
     this.retainObject = retainObject;
     this.options = options;
@@ -423,7 +423,7 @@ export default class {
     let viewClass = getShortViewName(component);
     let completeViewClass = viewClass;
     let tagName = get(component, 'tagName');
-    let objectId = this.retainObject(component);
+    let objectId = this.retainObject({ instance: component });
     let duration = this.durations[objectId];
 
     let name = getShortViewName(component);
@@ -605,7 +605,9 @@ export default class {
     let applicationOutlet = this.getApplicationOutlet();
     let element = this.elementForRoot();
 
-    if (!element) { return; }
+    if (!element) {
+      return;
+    }
 
     let options = {
       isPreview,
@@ -708,7 +710,7 @@ export default class {
    *     value: |inspected outlet|,
    *     contorller: |controller instance|
    *   }
- *   ]
+   *   ]
    *
    * @method outletArray
    * @param  {Object} outletTree
