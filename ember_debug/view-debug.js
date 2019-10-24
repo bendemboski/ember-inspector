@@ -26,7 +26,7 @@ const {
   Controller,
   String
 } = Ember;
-const { later } = run;
+const { throttle } = run;
 const { readOnly } = computed;
 const { classify } = String;
 
@@ -285,18 +285,21 @@ export default EmberObject.extend(PortMixin, {
     this.sendMessage('stopInspecting', {});
   },
 
+  send() {
+    if (this.isDestroying) {
+      return;
+    }
+    this.releaseCurrentObjects();
+    let tree = this.viewTree();
+    if (tree) {
+      this.sendMessage('viewTree', { tree });
+    }
+  },
+
   scheduledSendTree() {
-    // Send out of band
-    later(() => {
-      if (this.isDestroying) {
-        return;
-      }
-      this.releaseCurrentObjects();
-      let tree = this.viewTree();
-      if (tree) {
-        this.sendMessage('viewTree', { tree });
-      }
-    }, 50);
+    // needs to trigger on the trailing edge of the wait interval, otherwise it might happen
+    // that we do not pick up fast route switching or 2 or more short rerenders
+    throttle(this, this.send, 250, false);
   },
 
   viewTree() {
